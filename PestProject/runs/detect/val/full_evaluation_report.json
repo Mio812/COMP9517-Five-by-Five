@@ -1,0 +1,34 @@
+{
+    "baseline_performance_clean_test_set": {
+        "mAP@50-95": 0.43768303740622677,
+        "mAP@50": 0.7433972843040717,
+        "Precision": 0.7411820827856089,
+        "Recall": 0.7241379310344828,
+        "F1_Score": 0.7325603808123595
+    },
+    "timing": {
+        "total_test_time_seconds": 3.658210515975952,
+        "avg_inference_ms_per_image": 6.700019260029217,
+        "fps": 149.25330229508018
+    },
+    "robustness_evaluation": {
+        "gaussian_noise_sev_3": {
+            "mAP@50": 0.08997597821793403,
+            "mAP@50-95": 0.05230210493745291,
+            "performance_drop_mAP50_percent": 87.89664959535537,
+            "performance_drop_mAP50_95_percent": 88.0502325958523
+        },
+        "blur_sev_3": {
+            "mAP@50": 0.7371541331039652,
+            "mAP@50-95": 0.42638892266815664,
+            "performance_drop_mAP50_percent": 0.8398135602487499,
+            "performance_drop_mAP50_95_percent": 2.5804323615099847
+        },
+        "brightness_sev_3": {
+            "mAP@50": 0.7075434009833307,
+            "mAP@50-95": 0.4130094863956605,
+            "performance_drop_mAP50_percent": 4.822977441235272,
+            "performance_drop_mAP50_95_percent": 5.637310314054054
+        }
+    }
+}

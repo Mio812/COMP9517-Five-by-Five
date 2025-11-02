@@ -1,0 +1,14 @@
+================== Baseline Model on Severe Summary ==================
+Model: /root/autodl-tmp/yolon/baseline_yolo11n/weights/best.pt
+Split: Severe
+Image Size: 640
+Total Testing Time: 2.06 seconds
+
+Metrics:
+  Precision            0.7821 (78.21%)
+  Recall               0.2811 (28.11%)
+  F1 Score             0.4136 (41.36%)
+  AUC                  0.6711 (67.11%)
+  mAP@0.5              0.3259 (32.59%)
+  mAP@0.5:0.95         0.1961 (19.61%)
+======================================================================

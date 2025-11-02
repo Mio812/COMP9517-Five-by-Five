@@ -1,0 +1,17 @@
+names:
+- Ants
+- Bees
+- Beetles
+- Caterpillars
+- Earthworms
+- Earwigs
+- Grasshoppers
+- Moths
+- Slugs
+- Snails
+- Wasps
+- Weevils
+path: /root/autodl-tmp/yolon/augmented_datasets/Agro-Pest-12-Augmented
+test: test/images
+train: train/images
+val: valid/images

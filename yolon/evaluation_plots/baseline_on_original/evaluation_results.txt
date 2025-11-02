@@ -1,0 +1,14 @@
+================= Baseline Model on Original Summary =================
+Model: /root/autodl-tmp/yolon/baseline_yolo11n/weights/best.pt
+Split: Original
+Image Size: 640
+Total Testing Time: 2.94 seconds
+
+Metrics:
+  Precision            0.8299 (82.99%)
+  Recall               0.7041 (70.41%)
+  F1 Score             0.7618 (76.18%)
+  AUC                  0.9287 (92.87%)
+  mAP@0.5              0.7667 (76.67%)
+  mAP@0.5:0.95         0.4597 (45.97%)
+======================================================================

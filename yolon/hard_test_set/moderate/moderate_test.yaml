@@ -1,0 +1,17 @@
+names:
+- Ants
+- Bees
+- Beetles
+- Caterpillars
+- Earthworms
+- Earwigs
+- Grasshoppers
+- Moths
+- Slugs
+- Snails
+- Wasps
+- Weevils
+path: /root/autodl-tmp/yolon/hard_test_set/moderate
+test: images
+train: images
+val: images

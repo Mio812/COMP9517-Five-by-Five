@@ -1,0 +1,14 @@
+=================== Baseline Model on Mild Summary ===================
+Model: /root/autodl-tmp/yolon/baseline_yolo11n/weights/best.pt
+Split: Mild
+Image Size: 640
+Total Testing Time: 1.84 seconds
+
+Metrics:
+  Precision            0.6550 (65.50%)
+  Recall               0.3180 (31.80%)
+  F1 Score             0.4281 (42.81%)
+  AUC                  0.6713 (67.13%)
+  mAP@0.5              0.3399 (33.99%)
+  mAP@0.5:0.95         0.2066 (20.66%)
+======================================================================
