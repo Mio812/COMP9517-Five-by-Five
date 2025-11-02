@@ -1,0 +1,14 @@
+================== Robust Model on Moderate Summary ==================
+Model: /root/autodl-tmp/yolon/robust_yolo11n_augmented/weights/best.pt
+Split: Moderate
+Image Size: 640
+Total Testing Time: 1.42 seconds
+
+Metrics:
+  Precision            0.8136 (81.36%)
+  Recall               0.6909 (69.09%)
+  F1 Score             0.7472 (74.72%)
+  AUC                  0.9145 (91.45%)
+  mAP@0.5              0.7354 (73.54%)
+  mAP@0.5:0.95         0.4090 (40.90%)
+======================================================================

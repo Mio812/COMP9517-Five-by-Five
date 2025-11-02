@@ -1,0 +1,14 @@
+==================== Robust Model on Mild Summary ====================
+Model: /root/autodl-tmp/yolon/robust_yolo11n_augmented/weights/best.pt
+Split: Mild
+Image Size: 640
+Total Testing Time: 1.45 seconds
+
+Metrics:
+  Precision            0.8407 (84.07%)
+  Recall               0.6739 (67.39%)
+  F1 Score             0.7481 (74.81%)
+  AUC                  0.9154 (91.54%)
+  mAP@0.5              0.7393 (73.93%)
+  mAP@0.5:0.95         0.4182 (41.82%)
+======================================================================

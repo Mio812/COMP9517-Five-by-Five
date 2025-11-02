@@ -1,0 +1,14 @@
+================== Robust Model on Original Summary ==================
+Model: /root/autodl-tmp/yolon/robust_yolo11n_augmented/weights/best.pt
+Split: Original
+Image Size: 640
+Total Testing Time: 1.32 seconds
+
+Metrics:
+  Precision            0.8633 (86.33%)
+  Recall               0.7389 (73.89%)
+  F1 Score             0.7963 (79.63%)
+  AUC                  0.9361 (93.61%)
+  mAP@0.5              0.7975 (79.75%)
+  mAP@0.5:0.95         0.4779 (47.79%)
+======================================================================

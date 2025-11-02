@@ -1,0 +1,14 @@
+=================== Robust Model on Severe Summary ===================
+Model: /root/autodl-tmp/yolon/robust_yolo11n_augmented/weights/best.pt
+Split: Severe
+Image Size: 640
+Total Testing Time: 1.40 seconds
+
+Metrics:
+  Precision            0.7806 (78.06%)
+  Recall               0.6625 (66.25%)
+  F1 Score             0.7167 (71.67%)
+  AUC                  0.8950 (89.50%)
+  mAP@0.5              0.7119 (71.19%)
+  mAP@0.5:0.95         0.3921 (39.21%)
+======================================================================
