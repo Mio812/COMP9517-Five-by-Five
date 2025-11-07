@@ -1,0 +1,3 @@
+fastrcnn/results/*.pth
+machine_learning/features/*.pkl
+machine_learning/models/*.pkl
