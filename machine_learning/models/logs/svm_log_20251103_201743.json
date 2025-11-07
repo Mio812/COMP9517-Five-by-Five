@@ -1,0 +1,11 @@
+{
+    "features_dir": "../features",
+    "kernel": "rbf",
+    "best_params": {
+        "C": 10.0,
+        "gamma": 0.1
+    },
+    "val_acc": 0.47651006711409394,
+    "saved_model": "models/final_svm.pkl",
+    "timestamp": "2025-11-03T20:17:43.730014"
+}
