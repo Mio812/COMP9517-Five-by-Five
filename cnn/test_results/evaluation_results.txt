@@ -1,19 +1,20 @@
 ======================================================================
 Faster R-CNN Model - Test Set Evaluation Results
 ======================================================================
+Split: robustness_test
 Model: /root/autodl-tmp/cnn/runs/remix_exp1/best.pt
-Test Set: /root/autodl-tmp/dataset
+Test Set: /root/autodl-tmp/yolon/hard_test_set/severe
 Image Size: 640
-Batch Size: 32
+Batch Size: 16
 Confidence Threshold: 0.001
 
 Metrics:
-  Precision            0.8434 (84.34%)
-  Recall               0.8578 (85.78%)
-  F1 Score             0.8425 (84.25%)
-  Accuracy             0.8449 (84.49%)
-  AUC                  0.9662 (96.62%)
-  mAP@0.5              0.7333 (73.33%)
-  mAP@0.5:0.95         0.3828 (38.28%)
-  Test Time (ms/img)   18.96 ms
+  Precision            0.7014 (70.14%)
+  Recall               0.6488 (64.88%)
+  F1 Score             0.5732 (57.32%)
+  Accuracy             0.5373 (53.73%)
+  AUC                  0.8167 (81.67%)
+  mAP@0.5              0.3685 (36.85%)
+  mAP@0.5:0.95         0.1843 (18.43%)
+  Test Time (ms/img)   9.73 ms
 ======================================================================
