@@ -31,9 +31,10 @@ project/
 │   └── test/                    # Test data
 │
 ├── yolon/                         # YOLO11n enhanced version (data augmentation experiments)
-│   ├── train.py                   # Training script (baseline and robust models)
-│   ├── test.py                    # Comprehensive testing with robustness evaluation
+│   ├── train_yolo.py                   # Training script (baseline and robust models)
+│   ├── test_yolo.py                    # Comprehensive testing with robustness evaluation
 │   ├── prepare_dataset.py         # Dataset preparation and augmentation
+│   ├── distortion_analysis.py     # Analysis of distortion test set
 │   ├── baseline_yolo11n/          # Baseline model results
 │   ├── robust_yolo11n_augmented/  # Robust model results (with augmentation)
 │   ├── augmented_datasets/        # Augmented dataset
@@ -41,11 +42,12 @@ project/
 │   └── evaluation_plots/          # Comprehensive evaluation plots
 │
 ├── PestProject/                   # YOLO with CBAM attention mechanism
-│   ├── train.py                   # Training script
-│   ├── test.py                    # Testing and evaluation script
+│   ├── train_CBAM.py                   # Training script
+│   ├── test_CBAM.py                    # Testing and evaluation script
 │   ├── custom_modules.py          # Custom modules (CBAM attention)
-│   ├── custom_yolov8_cbam.yaml    # Custom model configuration
+│   ├── custom_yolov11n_cbam.yaml    # Custom model configuration
 │   ├── visualize_attention.py     # Attention visualization tool
+│   ├── __pycache__/               # Cache files containing compiled Python modules
 │   └── runs/                      # Training results and model weights
 │
 ├── fastrcnn/                      # Faster R-CNN implementation
@@ -64,9 +66,12 @@ project/
 │       ├── train_svm.py           # SVM training with hyperparameter tuning
 │       └── evaluate.py            # Model evaluation with extended metrics
 │
-└── cnn/                           # Advanced CNN experiments
-    ├── fast_rcnn_advanced.py     # Advanced Faster R-CNN implementation
-    └── test_results/              # Test results and visualizations
+└── cnn/                                       # Advanced CNN experiments
+    ├── fast_rcnn_advanced.py                  # Basic Faster R-CNN model
+    ├── train_fastcnn.py                       # Train Faster R-CNN implementation
+    ├── test_fastcnn.py                        # Test Faster R-CNN model
+    ├── runs/                                  # Training results and model weights
+    └── test_results_with_robustness/          # Test results and visualizations
 ```
 
 ## Getting Started
@@ -188,7 +193,7 @@ This script creates an augmented dataset using Albumentations with:
 **Training Baseline and Robust Models:**
 ```bash
 cd yolon
-python train.py
+python train_yolo.py
 ```
 
 This script trains two models:
@@ -198,7 +203,7 @@ This script trains two models:
 **Comprehensive Evaluation:**
 ```bash
 cd yolon
-python test.py
+python test_yolo.py
 ```
 
 This script performs:
@@ -213,7 +218,7 @@ This script performs:
 **Training:**
 ```bash
 cd PestProject
-python train.py
+python train_CBAM.py
 ```
 
 The model integrates CBAM (Convolutional Block Attention Module) which includes:
@@ -223,7 +228,7 @@ The model integrates CBAM (Convolutional Block Attention Module) which includes:
 **Testing:**
 ```bash
 cd PestProject
-python test.py
+python test_CBAM.py
 ```
 
 **Visualize Attention:**
