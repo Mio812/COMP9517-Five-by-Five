@@ -442,3 +442,9 @@ The project automatically generates various visualizations:
 - [ ] Active learning for dataset expansion
 - [ ] Mobile-optimized models
 
+## Contributors
+Yuyi Zhu 22%
+Maoqin Liu 21%
+Yilin Ge 21%
+Songning Liu 18%
+Zhuorui Chai 18%
