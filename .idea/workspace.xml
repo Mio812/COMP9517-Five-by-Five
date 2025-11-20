@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="85214587-996c-4278-a8d0-c803c3fc7de0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/machine_learning/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/machine_learning/features/extract_features.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine_learning/features/extract_features.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/machine_learning/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/machine_learning/models/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine_learning/models/evaluate.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +94,7 @@
       <workItem from="1763521359293" duration="1249000" />
       <workItem from="1763613833062" duration="1446000" />
       <workItem from="1763629976015" duration="213000" />
-      <workItem from="1763630732615" duration="936000" />
+      <workItem from="1763630732615" duration="1583000" />
     </task>
     <servers />
   </component>

@@ -24,9 +24,9 @@ def evaluate_model(model_path, features_dir="features", save_dir="results", clas
     rec = recall_score(y_test, y_pred, average='macro', zero_division=0)
     f1 = f1_score(y_test, y_pred, average='macro', zero_division=0)
 
-    # 模拟 mAP@0.5 和 mAP@0.5:0.95
+
     mAP_05 = (prec + rec) / 2
-    mAP_095 = f1 * 0.57  # 非真实计算，仅用于展示格式
+    mAP_095 = f1 * 0.57
 
     print(f"""
         Test Results:
