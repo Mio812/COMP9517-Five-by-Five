@@ -1,20 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Feature Extractor for Insect Classification (Batch Version)
-===========================================================
-
-📘 功能说明：
- - 一次性提取 train / valid / test 三个数据集的特征
- - 特征类型：HOG（形状）+ RGB颜色直方图（外观）
- - 自动保存为 features_train.pkl / features_valid.pkl / features_test.pkl
-
-💡 使用示例：
-    python features/extract_features.py \
-        --base_dir data \
-        --save_dir features \
-        --resize 128
-"""
 
 import cv2
 import numpy as np
@@ -25,9 +8,6 @@ import joblib
 import argparse
 
 
-# ============================================================
-# 🧠 单个ROI特征提取函数
-# ============================================================
 def extract_single_roi_features(roi_img, resize_size=(128, 128)):
     """提取单个ROI的组合特征（HOG + Color Histogram）"""
     roi_img = cv2.resize(roi_img, resize_size)

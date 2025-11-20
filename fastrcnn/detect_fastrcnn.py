@@ -1,25 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-detect_fastrcnn.py
-=========================
-Use trained Faster R-CNN model to detect insects in images or directories.
-
-Usage Examples:
---------------- 
-# Detect a single image
-python detect_fastrcnn.py \
-    --weights results/fastrcnn_best.pth \
-    --image data/test_images/sample.jpg \
-    --class_names beetle fly wasp caterpillar
-
-# Detect all images in a folder
-python detect_fastrcnn.py \
-    --weights results/fastrcnn_best.pth \
-    --image_dir data/test_images \
-    --output_dir results/detections \
-    --class_names beetle fly wasp caterpillar
-"""
 
 import argparse
 import torch
@@ -29,24 +7,17 @@ from torchvision import transforms
 from models.faster_rcnn_model import create_faster_rcnn
 
 
-# ============================================================
-# 🧠 Detection Function
-# ============================================================
 def detect_fastrcnn(weights, image=None, image_dir=None, output_dir="results/detections",
                     conf_thresh=0.5, class_names=None, num_classes=None):
-    """
-    Run Faster R-CNN inference on single image or folder.
-    """
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # --- Create model ---
     if num_classes is None:
         num_classes = len(class_names) + 1  # + background
     model = create_faster_rcnn(num_classes=num_classes, pretrained=False)
     model.load_state_dict(torch.load(weights, map_location=device))
     model.to(device).eval()
 
-    # --- Prepare paths ---
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -57,7 +28,6 @@ def detect_fastrcnn(weights, image=None, image_dir=None, output_dir="results/det
     else:
         raise ValueError("Please provide either --image or --image_dir.")
 
-    # --- Loop over images ---
     for img_path in image_paths:
         img = cv2.imread(str(img_path))
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -83,14 +53,10 @@ def detect_fastrcnn(weights, image=None, image_dir=None, output_dir="results/det
 
         out_path = output_dir / img_path.name
         cv2.imwrite(str(out_path), img)
-        print(f"✅ Saved detection: {out_path}")
+        print(f"Saved detection: {out_path}")
 
-    print("🎉 Detection completed!")
+    print("Detection completed!")
 
-
-# ============================================================
-# 🖥️ Command Line Interface
-# ============================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Faster R-CNN inference on images.")
     parser.add_argument("--weights", type=str, required=True, help="Path to trained weights (.pth)")

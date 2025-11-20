@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-evaluate_fastrcnn_full.py (IoU-corrected & Visual Enhanced)
-===========================================================
-Enhanced evaluation for Faster R-CNN on YOLO-format insect dataset:
- - Calculates mAP, F1, Accuracy
- - Generates confusion matrix (IoU matched)
- - Produces bar chart & radar chart with detailed styling
-"""
 
 import torch
 import cv2
@@ -22,10 +12,6 @@ from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, a
 import seaborn as sns
 from models.faster_rcnn_model import create_faster_rcnn
 
-
-# ============================================================
-# 📦 Load YOLO Labels
-# ============================================================
 def load_yolo_labels(label_path, img_w, img_h):
     boxes, labels = [], []
     if not label_path.exists():
@@ -43,12 +29,9 @@ def load_yolo_labels(label_path, img_w, img_h):
     return torch.tensor(boxes, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
 
-# ============================================================
-# 🧠 Evaluation Function
-# ============================================================
 def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, class_names=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"🧠 Using device: {device}")
+    print(f"Using device: {device}")
 
     num_classes = len(class_names) + 1
     model = create_faster_rcnn(num_classes=num_classes, pretrained=False)
@@ -64,7 +47,7 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
 
     all_true, all_pred = [], []
 
-    print(f"📂 Evaluating {len(image_paths)} test images...\n")
+    print(f"Evaluating {len(image_paths)} test images...\n")
     for img_path in tqdm(image_paths):
         img = cv2.imread(str(img_path))
         if img is None:
@@ -91,7 +74,6 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
         all_true.extend(labels_true.numpy().tolist())
         all_pred.extend(labels_pred.numpy().tolist())
 
-    # --- Compute global metrics ---
     results = metric.compute()
     map50 = results["map_50"].item()
     map5095 = results["map"].item()
@@ -106,7 +88,7 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
     )
     acc = accuracy_score(all_true, all_pred)
 
-    print("\n📊 Evaluation Results:")
+    print("\nEvaluation Results:")
     print(f"mAP@0.5       : {map50:.4f}")
     print(f"mAP@0.5:0.95  : {map5095:.4f}")
     print(f"mAR@100       : {mar100:.4f}")
@@ -115,10 +97,7 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
     print(f"F1-score      : {f1:.4f}")
     print(f"Accuracy      : {acc:.4f}")
 
-    # ============================================================
-    # 🧩 IoU-based Confusion Matrix Calculation
-    # ============================================================
-    print("\n🔧 Building IoU-matched confusion matrix...")
+    print("\n Building IoU-matched confusion matrix...")
     cm_true, cm_pred = [], []
 
     for img_path in tqdm(image_paths, desc="IoU Matching"):
@@ -157,13 +136,10 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
                 cm_true.append(int(t))
                 cm_pred.append(0)
 
-    # ============================================================
-    # 💾 Save results
-    # ============================================================
     result_dir = Path("results")
     result_dir.mkdir(exist_ok=True)
     with open(result_dir / "evaluation_results.txt", "w") as f:
-        f.write("📊 Faster R-CNN Evaluation Results\n")
+        f.write("Faster R-CNN Evaluation Results\n")
         f.write(f"mAP@0.5:      {map50:.4f}\n")
         f.write(f"mAP@0.5:0.95: {map5095:.4f}\n")
         f.write(f"mAR@100:      {mar100:.4f}\n")
@@ -172,9 +148,6 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
         f.write(f"F1-score:     {f1:.4f}\n")
         f.write(f"Accuracy:     {acc:.4f}\n")
 
-    # ============================================================
-    # 🎯 Confusion Matrix (IoU-based)
-    # ============================================================
     cm = confusion_matrix(cm_true, cm_pred, labels=range(1, len(class_names) + 1), normalize="true")
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt=".2f", cmap="Blues",
@@ -187,9 +160,6 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
     plt.savefig(result_dir / "confusion_matrix_iou.png", dpi=300)
     plt.close()
 
-    # ============================================================
-    # 📊 Metrics Bar Chart
-    # ============================================================
     metrics = ["Precision", "Recall", "F1 Score", "Accuracy", "mAP@0.5", "mAP@0.5:0.95"]
     values = [precision, recall, f1, acc, map50, map5095]
     colors = ["#4285F4", "#EA7E23", "#34A853", "#DB4437", "#A142F4", "#9E9E9E"]
@@ -210,9 +180,6 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
     plt.savefig(result_dir / "metrics_bar_chart.png", dpi=300)
     plt.close()
 
-    # ============================================================
-    # 🕸️ Radar Chart
-    # ============================================================
     radar_metrics = ["Precision", "Recall", "F1-score", "Accuracy", "mAP@0.5"]
     radar_values = [precision, recall, f1, acc, map50]
     angles = np.linspace(0, 2 * np.pi, len(radar_metrics), endpoint=False).tolist()
@@ -230,13 +197,10 @@ def evaluate_fastrcnn_full(weights, data_dir="dataset/test", conf_thresh=0.5, cl
     plt.savefig(result_dir / "radar_chart.png", dpi=300)
     plt.close()
 
-    print("📈 All evaluation figures saved in results/")
-    print("🎉 Evaluation completed successfully!")
+    print("All evaluation figures saved in results/")
+    print("Evaluation completed successfully!")
 
 
-# ============================================================
-# CLI
-# ============================================================
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Enhanced visualization for Faster R-CNN evaluation (IoU-matched).")

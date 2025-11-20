@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Enhanced Evaluation Script for SVM Model
-========================================
-📘 功能：
- - 输出准确率 / 精度 / 召回 / F1 / mAP(模拟)
- - 保存分类报告
- - 生成混淆矩阵（原始 + 归一化）
- - 绘制综合指标柱状图与雷达图
-"""
 
 import joblib
 import numpy as np
@@ -17,26 +6,19 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-# ============================================================
-# 🧪 模型评估函数
-# ============================================================
 def evaluate_model(model_path, features_dir="features", save_dir="results", class_names=None):
     model_path, features_dir, save_dir = Path(model_path), Path(features_dir), Path(save_dir)
     save_dir.mkdir(exist_ok=True, parents=True)
 
-    print(f"\n📂 Loading model from: {model_path}")
+    print(f"\nLoading model from: {model_path}")
     model = joblib.load(model_path)
 
-    print(f"📂 Loading test features from: {features_dir / 'features_test.pkl'}")
+    print(f"Loading test features from: {features_dir / 'features_test.pkl'}")
     X_test, y_test = joblib.load(features_dir / "features_test.pkl")
 
-    print("🔍 Evaluating model performance...")
+    print("Evaluating model performance...")
     y_pred = model.predict(X_test)
 
-    # -------------------------
-    # 1️⃣ 基本指标
-    # -------------------------
     acc = accuracy_score(y_test, y_pred)
     prec = precision_score(y_test, y_pred, average='macro', zero_division=0)
     rec = recall_score(y_test, y_pred, average='macro', zero_division=0)
@@ -47,28 +29,22 @@ def evaluate_model(model_path, features_dir="features", save_dir="results", clas
     mAP_095 = f1 * 0.57  # 非真实计算，仅用于展示格式
 
     print(f"""
-🎯 Test Results:
-------------------------
-Accuracy  : {acc:.4f}
-Precision : {prec:.4f}
-Recall    : {rec:.4f}
-F1-score  : {f1:.4f}
-mAP@0.5   : {mAP_05:.4f}
-mAP@0.5:0.95 : {mAP_095:.4f}
-""")
+        Test Results:
+        ------------------------
+        Accuracy  : {acc:.4f}
+        Precision : {prec:.4f}
+        Recall    : {rec:.4f}
+        F1-score  : {f1:.4f}
+        mAP@0.5   : {mAP_05:.4f}
+        mAP@0.5:0.95 : {mAP_095:.4f}
+        """)
 
-    # -------------------------
-    # 2️⃣ 分类报告
-    # -------------------------
     report = classification_report(y_test, y_pred, target_names=class_names, digits=4)
     report_path = save_dir / "classification_report.txt"
     with open(report_path, "w") as f:
         f.write(report)
-    print(f"📄 Saved classification report → {report_path}")
+    print(f"Saved classification report → {report_path}")
 
-    # -------------------------
-    # 3️⃣ 混淆矩阵（归一化）
-    # -------------------------
     cm = confusion_matrix(y_test, y_pred)
     cm_norm = cm.astype('float') / cm.sum(axis=1, keepdims=True)
 
@@ -82,11 +58,8 @@ mAP@0.5:0.95 : {mAP_095:.4f}
     fig_path = save_dir / "confusion_matrix_normalized.png"
     plt.savefig(fig_path)
     plt.close()
-    print(f"🖼️ Saved normalized confusion matrix → {fig_path}")
+    print(f"Saved normalized confusion matrix → {fig_path}")
 
-    # -------------------------
-    # 4️⃣ 柱状图 (Precision/Recall/F1/Accuracy/mAP)
-    # -------------------------
     metrics = {
         "Precision": prec,
         "Recall": rec,
@@ -113,11 +86,8 @@ mAP@0.5:0.95 : {mAP_095:.4f}
     bar_path = save_dir / "metrics_bar_chart.png"
     plt.savefig(bar_path)
     plt.close()
-    print(f"📊 Saved metrics bar chart → {bar_path}")
+    print(f"Saved metrics bar chart → {bar_path}")
 
-    # -------------------------
-    # 5️⃣ 雷达图 (Radar Chart)
-    # -------------------------
     labels = list(metrics.keys())
     values = list(metrics.values())
     values += values[:1]
@@ -136,9 +106,9 @@ mAP@0.5:0.95 : {mAP_095:.4f}
     radar_path = save_dir / "metrics_radar_chart.png"
     plt.savefig(radar_path)
     plt.close()
-    print(f"📈 Saved radar chart → {radar_path}")
+    print(f"Saved radar chart → {radar_path}")
 
-    print("\n✅ Evaluation complete!")
+    print("\nEvaluation complete!")
     return {
         "accuracy": acc,
         "precision": prec,
@@ -153,9 +123,6 @@ mAP@0.5:0.95 : {mAP_095:.4f}
     }
 
 
-# ============================================================
-# 🔹 命令行接口
-# ============================================================
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Evaluate trained SVM model with extended metrics and plots.")

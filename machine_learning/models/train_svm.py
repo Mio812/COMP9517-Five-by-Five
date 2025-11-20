@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-train_svm.py
-===================
-🎯 Command-line interface for training an SVM classifier on saved feature files.
-
-Usage Example:
-    python train_svm.py --features_dir data/features --kernel rbf --C_values 1 10 100 \
-                        --gamma_values 0.1 0.01 --save_path models/svm_model.pkl \
-                        --use_test --report --save_log
-"""
 
 import joblib
 import numpy as np
@@ -23,21 +11,17 @@ import datetime
 import matplotlib.pyplot as plt
 
 
-# ============================================================
-# 📂 Load Features
-# ============================================================
 def load_features(features_dir):
-    """加载 train / val / test 特征"""
     features_dir = Path(features_dir)
-    print(f"📂 Loading features from: {features_dir.resolve()}")
+    print(f"Loading features from: {features_dir.resolve()}")
 
     def try_load(filename):
         path = features_dir / filename
         if path.exists():
-            print(f"✅ Loaded: {filename}")
+            print(f"Loaded: {filename}")
             return joblib.load(path)
         else:
-            print(f"⚠️ Missing: {filename}")
+            print(f"Missing: {filename}")
             return None
 
     train = try_load("features_train.pkl")
@@ -46,16 +30,13 @@ def load_features(features_dir):
     return train, val, test
 
 
-# ============================================================
-# 🧪 Optional: Evaluate Model
-# ============================================================
 def evaluate_model(model, X, y, name="Test", report=False, show_confusion=False):
     preds = model.predict(X)
     acc = accuracy_score(y, preds)
-    print(f"\n🎯 {name} Accuracy: {acc:.4f}")
+    print(f"\n{name} Accuracy: {acc:.4f}")
 
     if report:
-        print("\n📊 Classification Report:")
+        print("\nClassification Report:")
         print(classification_report(y, preds, digits=4))
 
     if show_confusion:
@@ -69,10 +50,6 @@ def evaluate_model(model, X, y, name="Test", report=False, show_confusion=False)
 
     return acc
 
-
-# ============================================================
-# 🧩 Training Function
-# ============================================================
 def train_model_from_files(
     features_dir="features",
     kernel="rbf",
@@ -91,27 +68,24 @@ def train_model_from_files(
     save_path=None,
     save_log=False,
 ):
-    """主训练流程"""
-    print("\n🚀 Training SVM classifier from saved features...")
+    print("\nTraining SVM classifier from saved features...")
 
-    # 1️⃣ 加载特征
     train, val, test = load_features(features_dir)
     if train is None:
-        sys.exit("❌ No training features found! Please run feature extraction first.")
+        sys.exit("No training features found! Please run feature extraction first.")
 
     X_train, y_train = train
     X_val, y_val = val if val is not None else (None, None)
 
-    print(f"\n📊 Dataset summary:")
+    print(f"\nDataset summary:")
     print(f"   Train: X={X_train.shape}, y={y_train.shape}")
     if X_val is not None:
         print(f"   Valid: X={X_val.shape}, y={y_val.shape}")
     if test is not None:
         print(f"   Test:  X={test[0].shape}, y={test[1].shape}")
 
-    # 2️⃣ 训练模型
     if X_val is None:
-        print("⚠️ No validation set found — using default parameters.")
+        print("No validation set found — using default parameters.")
         best_model = SVC(
             kernel=kernel, C=10, gamma="scale", degree=degree,
             class_weight=class_weight, max_iter=max_iter,
@@ -121,7 +95,7 @@ def train_model_from_files(
         best_params = {"C": 10, "gamma": "scale"}
         best_acc = -1
     else:
-        print("\n🔍 Validation set detected — tuning hyperparameters...")
+        print("\nValidation set detected — tuning hyperparameters...")
         best_acc, best_model, best_params, no_improve = -1, None, None, 0
 
         for C in C_values:
@@ -130,7 +104,7 @@ def train_model_from_files(
                     gamma_val = float(gamma) if gamma not in ["scale", "auto"] else gamma
                 except ValueError:
                     gamma_val = gamma
-                print(f"   🔹 Training model with C={C}, gamma={gamma_val} ...")
+                print(f"   Training model with C={C}, gamma={gamma_val} ...")
 
                 model = SVC(
                     kernel=kernel, C=C, gamma=gamma_val, degree=degree,
@@ -147,27 +121,21 @@ def train_model_from_files(
                 else:
                     no_improve += 1
 
-                # if no_improve >= patience:
-                #     print(f"⏹️ Early stopping after {no_improve} rounds without improvement.")
-                #     break
             else:
                 continue
 
-        print(f"\n✅ Best parameters: {best_params}, val_acc={best_acc:.4f}")
+        print(f"\nBest parameters: {best_params}, val_acc={best_acc:.4f}")
 
-    # 3️⃣ 评估测试集（可选）
     if use_test and test is not None:
         X_test, y_test = test
         evaluate_model(best_model, X_test, y_test, name="Test", report=report, show_confusion=False)
 
-    # 4️⃣ 保存模型
     if save_path:
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(best_model, save_path)
-        print(f"\n💾 Model saved to: {save_path.resolve()}")
+        print(f"\nModel saved to: {save_path.resolve()}")
 
-    # 5️⃣ 保存日志
     if save_log:
         log = {
             "features_dir": str(features_dir),
@@ -181,14 +149,10 @@ def train_model_from_files(
         log_path = Path("logs") / f"svm_log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(log_path, "w") as f:
             json.dump(log, f, indent=4)
-        print(f"📝 Log saved to: {log_path.resolve()}")
+        print(f"Log saved to: {log_path.resolve()}")
 
     return best_model
 
-
-# ============================================================
-# 🔹 Command-Line Interface
-# ============================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train an SVM model from extracted features.")
     parser.add_argument("--features_dir", type=str, default="features")

@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-train_fastrcnn.py
-=========================
-Train a Faster R-CNN model on a YOLO-format insect detection dataset
-✅ 支持 Early Stopping
-✅ 自动过滤空标签图片
-✅ 正确的验证阶段 loss 计算（不会报 list.values() 错误）
-"""
 
 import argparse
 import torch
@@ -22,9 +12,6 @@ from torchvision.transforms import functional as F
 from models.faster_rcnn_model import create_faster_rcnn
 
 
-# ============================================================
-# 🧠 Dataset Loader for YOLO-format data
-# ============================================================
 class YoloDetectionDataset(torch.utils.data.Dataset):
     def __init__(self, image_dir, label_dir, class_names):
         self.image_dir = Path(image_dir)
@@ -38,7 +25,7 @@ class YoloDetectionDataset(torch.utils.data.Dataset):
 
         img = cv2.imread(str(img_path))
         if img is None:
-            print(f"⚠️ Skipping {img_path.name}: image file unreadable.")
+            print(f"Skipping {img_path.name}: image file unreadable.")
             return None
 
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -50,7 +37,7 @@ class YoloDetectionDataset(torch.utils.data.Dataset):
                 for line in f:
                     parts = line.strip().split()
                     if len(parts) != 5:
-                        print(f"⚠️ Invalid label format in {label_path.name}, skipping line.")
+                        print(f"Invalid label format in {label_path.name}, skipping line.")
                         continue
                     cls, xc, yc, bw, bh = map(float, parts)
                     x1, y1 = (xc - bw / 2) * w, (yc - bh / 2) * h
@@ -58,11 +45,11 @@ class YoloDetectionDataset(torch.utils.data.Dataset):
                     boxes.append([x1, y1, x2, y2])
                     labels.append(int(cls) + 1)  # background = 0
         else:
-            print(f"⚠️ Skipping {img_path.name}: no label file found.")
+            print(f"Skipping {img_path.name}: no label file found.")
             return None
 
         if len(boxes) == 0:
-            print(f"⚠️ Skipping {img_path.name}: empty label file (no boxes).")
+            print(f"Skipping {img_path.name}: empty label file (no boxes).")
             return None
 
         target = {
@@ -76,13 +63,10 @@ class YoloDetectionDataset(torch.utils.data.Dataset):
         return len(self.images)
 
 
-# ============================================================
-# 🧩 Training Function
-# ============================================================
 def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
                    save_path="results/fastrcnn_best.pth", class_names=None, patience=10):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"🧠 Using device: {device}")
+    print(f"Using device: {device}")
 
     data_dir = Path(data_dir)
     train_img_dir = data_dir / "train/images"
@@ -118,7 +102,6 @@ def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
         model.train()
         running_loss = 0.0
 
-        # --- Training ---
         for imgs, targets in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}"):
             if len(imgs) == 0:
                 continue
@@ -135,14 +118,14 @@ def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
             running_loss += losses.item()
 
         if len(train_loader) == 0:
-            print("❌ No valid training samples found. Please check your dataset labels.")
+            print("No valid training samples found. Please check your dataset labels.")
             return
 
         avg_train_loss = running_loss / len(train_loader)
         train_losses.append(avg_train_loss)
 
-        # --- Validation ---
-        model.train()  # ✅ 保持train模式以便计算loss
+
+        model.train()
         val_loss = 0.0
         with torch.no_grad():
             for imgs, targets in val_loader:
@@ -157,7 +140,7 @@ def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
         avg_val_loss = val_loss / max(1, len(val_loader))
         val_losses.append(avg_val_loss)
 
-        print(f"📉 Epoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+        print(f"Epoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
 
         # --- Early Stopping ---
         if avg_val_loss < best_loss:
@@ -165,18 +148,17 @@ def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
             no_improve_count = 0
             Path(save_path).parent.mkdir(parents=True, exist_ok=True)
             torch.save(model.state_dict(), save_path)
-            print(f"💾 Saved best model (Val Loss={avg_val_loss:.4f}) → {save_path}")
+            print(f"Saved best model (Val Loss={avg_val_loss:.4f}) → {save_path}")
         else:
             no_improve_count += 1
-            print(f"⚠️ No improvement for {no_improve_count} epoch(s).")
+            print(f"No improvement for {no_improve_count} epoch(s).")
 
         if no_improve_count >= patience:
-            print(f"⏹️ Early stopping triggered after {epoch+1} epochs (no improvement for {patience} epochs).")
+            print(f"Early stopping triggered after {epoch+1} epochs (no improvement for {patience} epochs).")
             break
 
         lr_scheduler.step()
 
-    # --- Plot Loss Curve ---
     plt.figure(figsize=(6, 4))
     plt.plot(train_losses, label="Train Loss")
     plt.plot(val_losses, label="Val Loss")
@@ -188,14 +170,11 @@ def train_fastrcnn(data_dir="dataset", epochs=10, batch_size=4, lr=0.005,
     plt.savefig(Path(save_path).parent / "training_curve.png")
     plt.show()
 
-    print("🎉 Training completed!")
+    print("Training completed!")
     print(f"Best Validation Loss: {best_loss:.4f}")
     print(f"Model saved at: {save_path}")
 
 
-# ============================================================
-# 🖥️ Command Line Interface
-# ============================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Faster R-CNN on YOLO-format insect dataset with Early Stopping.")
     parser.add_argument("--data_dir", type=str, default="../dataset", help="Root directory of YOLO-format dataset")
