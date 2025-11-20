@@ -13,7 +13,7 @@ ORIGINAL_DATA_YAML = DATASET_ROOT / 'data.yaml'
 AUGMENTED_DATASET_DIR = SCRIPT_DIR / 'augmented_datasets' / 'Agro-Pest-12-Augmented'
 AUGMENTATION_FACTOR = 3
 
-print("Removing optional arguments to ensure Albumentations compatibility.")
+print("Removing optional parameters to ensure Albumentations compatibility.")
 transform = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.Rotate(limit=20, p=0.5, border_mode=cv2.BORDER_CONSTANT),
@@ -46,10 +46,9 @@ def write_yolo_labels(label_path, bboxes, labels):
             f.write(f"{label} {' '.join(f'{c:.6f}' for c in bbox)}\n")
 
 def process_dataset():
-    """Main function"""
     print("Starting to create the augmented dataset...")
     if not ORIGINAL_DATA_YAML.exists():
-        print(f"Error: Original dataset configuration file not found at {ORIGINAL_DATA_YAML}")
+        print(f"Error: Original dataset config file not found at {ORIGINAL_DATA_YAML}")
         return
 
     with open(ORIGINAL_DATA_YAML, 'r') as f:
@@ -63,7 +62,7 @@ def process_dataset():
         os.makedirs(AUGMENTED_DATASET_DIR / split / 'images', exist_ok=True)
         os.makedirs(AUGMENTED_DATASET_DIR / split / 'labels', exist_ok=True)
 
-    print("Processing the training set...")
+    print("Processing training set...")
     train_image_dir = DATASET_ROOT / 'train' / 'images'
     train_label_dir = DATASET_ROOT / 'train' / 'labels'
 
@@ -106,7 +105,7 @@ def process_dataset():
         if split_label_dir.exists():
             shutil.copytree(split_label_dir, AUGMENTED_DATASET_DIR / split / 'labels', dirs_exist_ok=True)
 
-    print("Creating new dataset configuration file...")
+    print("Creating new dataset config file...")
     new_yaml_config = {
         'path': str(AUGMENTED_DATASET_DIR.absolute()),
         'train': 'train/images', 'val': 'valid/images', 'test': 'test/images',
@@ -116,8 +115,7 @@ def process_dataset():
     with open(new_yaml_path, 'w') as f: yaml.dump(new_yaml_config, f)
 
     print(f"Augmented dataset created at: {AUGMENTED_DATASET_DIR}")
-    print(f"New configuration file: {new_yaml_path}")
-
+    print(f"New config file: {new_yaml_path}")
 
 if __name__ == '__main__':
     process_dataset()

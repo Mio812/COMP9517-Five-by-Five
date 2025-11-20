@@ -1,3 +1,8 @@
+"""
+Faster R-CNN Model Test and Evaluation Script
+Generates comprehensive metrics and visualizations for COMP9517 project
+"""
+
 import argparse
 import os
 from pathlib import Path
@@ -16,29 +21,36 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
-    confusion_matrix,
-    classification_report,
-    precision_score,
-    recall_score,
-    f1_score,
+    confusion_matrix, 
+    classification_report, 
+    precision_score, 
+    recall_score, 
+    f1_score, 
     accuracy_score,
-    roc_auc_score
+    roc_auc_score  # NEW: Import for AUC calculation
 )
-from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import label_binarize # NEW: To format labels for AUC
 import time
 from collections import defaultdict
 
+# Set style
 sns.set_style("whitegrid")
 plt.rcParams['font.size'] = 10
 plt.rcParams['figure.dpi'] = 300
 
+# ============================================================
+# 🔧 UTILITY FUNCTIONS
+# ============================================================
+
 def yolo_to_xyxy(box: np.ndarray, w: int, h: int) -> np.ndarray:
+    """Convert YOLO format (xc, yc, w, h) normalized to xyxy pixel coordinates"""
     xc, yc, bw, bh = box
     x1, y1 = (xc - bw / 2.0) * w, (yc - bh / 2.0) * h
     x2, y2 = (xc + bw / 2.0) * w, (yc + bh / 2.0) * h
     return np.array([x1, y1, x2, y2], dtype=np.float32)
 
 def load_class_names(data_root: Path) -> List[str]:
+    """Load class names from data.yaml"""
     yaml_path = data_root / 'data.yaml'
     if not yaml_path.exists():
         raise FileNotFoundError(f"data.yaml not found at {yaml_path}")
@@ -55,7 +67,12 @@ def load_class_names(data_root: Path) -> List[str]:
     
     return names
 
+# ============================================================
+# 📦 DATASET
+# ============================================================
+
 class TestDataset(Dataset):
+    """Simple dataset for testing"""
     def __init__(self, root: Path, split: str, class_names: List[str], imgsz: int = 640):
         self.root = root
         self.split = split
@@ -63,7 +80,7 @@ class TestDataset(Dataset):
         self.lbl_dir = root / split / "labels"
         
         self.img_paths = sorted([
-            p for p in self.img_dir.rglob("*")
+            p for p in self.img_dir.rglob("*") 
             if p.suffix.lower() in {".jpg", ".jpeg", ".png"}
         ])
         
@@ -110,7 +127,12 @@ def collate_fn(batch):
     images, boxes, labels, paths = zip(*batch)
     return list(images), list(boxes), list(labels), list(paths)
 
+# ============================================================
+# 🧠 MODEL
+# ============================================================
+
 class FasterRCNNDetector(nn.Module):
+    """Faster R-CNN model"""
     def __init__(self, num_classes: int, pretrained: bool = True):
         super().__init__()
         weights = 'DEFAULT' if pretrained else None
@@ -119,6 +141,10 @@ class FasterRCNNDetector(nn.Module):
         self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes + 1)
     def forward(self, images, targets=None):
         return self.model(images, targets)
+
+# ============================================================
+# 📊 EVALUATION FUNCTIONS
+# ============================================================
 
 @torch.no_grad()
 def evaluate_model(model, dataloader, device, conf_thres=0.5):
@@ -132,6 +158,7 @@ def evaluate_model(model, dataloader, device, conf_thres=0.5):
         images = [img.to(device) for img in images]
         start_time = time.time()
         predictions = model(images)
+        # MODIFIED: Account for batch size in inference time calculation
         inference_times.append((time.time() - start_time) / len(images))
         
         for pred, gt_box, gt_label in zip(predictions, boxes, labels):
@@ -149,10 +176,14 @@ def evaluate_model(model, dataloader, device, conf_thres=0.5):
     avg_inference_time = np.mean(inference_times)
     print(f"✓ Average inference time: {avg_inference_time*1000:.2f} ms per image")
     
-    return (all_pred_boxes, all_pred_labels, all_pred_scores,
+    return (all_pred_boxes, all_pred_labels, all_pred_scores, 
             all_gt_boxes, all_gt_labels, avg_inference_time)
 
+# MODIFIED: Function signature updated to accept avg_inference_time
 def calculate_metrics(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels, num_classes, class_names, avg_inference_time):
+    """
+    Calculate comprehensive metrics, including AUC.
+    """
     preds, targets = [], []
     for pb, pl, ps, gb, gl in zip(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels):
         preds.append({'boxes': pb, 'labels': pl, 'scores': ps})
@@ -171,6 +202,7 @@ def calculate_metrics(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels,
         if len(pl) == 0:
             matched_targets.extend(gl.numpy().tolist())
             matched_preds.extend([-1] * len(gl))
+            # NEW: Add dummy scores for missed detections
             matched_scores.extend([np.zeros(num_classes)] * len(gl))
             continue
 
@@ -188,22 +220,25 @@ def calculate_metrics(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels,
                 matched_targets.append(gl[best_iou_idx].item())
                 matched_preds.append(pl[i].item())
                 
+                # NEW: Construct a probability vector for AUC calculation
                 pred_label = pl[i].item()
                 pred_score = ps[i].item()
                 prob_vector = np.zeros(num_classes)
                 prob_vector[pred_label] = pred_score
+                # Distribute remaining probability among other classes
                 if num_classes > 1:
                     remaining_prob = (1.0 - pred_score) / (num_classes - 1)
                     prob_vector += remaining_prob
-                    prob_vector[pred_label] = pred_score
+                    prob_vector[pred_label] = pred_score # Re-assert the correct score
                 matched_scores.append(prob_vector)
 
         for j in range(len(gl)):
             if j not in matched_gt:
                 matched_targets.append(gl[j].item())
                 matched_preds.append(-1)
-                matched_scores.append(np.zeros(num_classes))
+                matched_scores.append(np.zeros(num_classes)) # Dummy score for missed GT
 
+    # --- Classification Metrics Calculation ---
     auc = 0.0
     valid_mask = np.array(matched_preds) != -1
     if valid_mask.sum() > 0:
@@ -215,7 +250,8 @@ def calculate_metrics(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels,
         f1 = f1_score(valid_targets, valid_preds, average='weighted', zero_division=0)
         accuracy = accuracy_score(valid_targets, valid_preds)
         
-        if len(np.unique(valid_targets)) > 1:
+        # NEW: Calculate AUC
+        if len(np.unique(valid_targets)) > 1: # AUC requires at least 2 classes in the sample
             y_true_binarized = label_binarize(valid_targets, classes=range(num_classes))
             auc = roc_auc_score(y_true_binarized, valid_scores, multi_class='ovr', average='weighted')
         else:
@@ -225,13 +261,14 @@ def calculate_metrics(pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels,
     
     if len(matched_targets) > 0:
         recall = recall_score(
-            matched_targets,
+            matched_targets, 
             np.where(np.array(matched_preds) == -1, matched_targets, matched_preds),
             average='weighted', zero_division=0
         )
     else:
         recall = 0.0
     
+    # MODIFIED: Add AUC and Test Time to the metrics dictionary
     metrics = {
         'Precision': precision,
         'Recall': recall,
@@ -256,6 +293,10 @@ def box_iou_numpy(boxes1, boxes2):
     iou = inter / np.clip(union, 1e-6, None)
     return iou
 
+# ============================================================
+# 📈 VISUALIZATION FUNCTIONS (Unchanged, they will automatically adapt)
+# ============================================================
+
 def plot_confusion_matrix(y_true, y_pred, class_names, save_path='confusion_matrix.png'):
     mask = np.array(y_pred) != -1
     y_true_filtered = np.array(y_true)[mask]
@@ -275,6 +316,7 @@ def plot_confusion_matrix(y_true, y_pred, class_names, save_path='confusion_matr
     print(f"✓ Confusion matrix saved to {save_path}")
 
 def plot_metrics_bar(metrics, save_path='metrics_bar_chart.png'):
+    # MODIFIED: Handle the time metric which has a different scale
     plot_metrics = {k: v for k, v in metrics.items() if 'Test Time' not in k}
     time_metric_val = metrics.get('Test Time (ms/img)', 0)
 
@@ -295,17 +337,19 @@ def plot_metrics_bar(metrics, save_path='metrics_bar_chart.png'):
     ax1.grid(axis='y', alpha=0.3, linestyle='--')
     plt.xticks(rotation=15, ha='right')
 
+    # NEW: Add a second y-axis for inference time
     ax2 = ax1.twinx()
-    ax2.plot([], [])
+    ax2.plot([], []) # Create a dummy plot to place the text
     ax2.text(1.02, 0.5, f'Test Time:\n{time_metric_val:.2f} ms/img', transform=ax1.transAxes,
              fontsize=14, fontweight='bold', ha='left', va='center',
              bbox=dict(boxstyle='round,pad=0.5', fc='orange', alpha=0.3))
-    ax2.set_yticks([])
+    ax2.set_yticks([]) # Hide the second y-axis ticks
 
     plt.tight_layout(); plt.savefig(save_path, dpi=300, bbox_inches='tight'); plt.close()
     print(f"✓ Metrics bar chart saved to {save_path}")
 
 def plot_metrics_radar(metrics, save_path='metrics_radar_chart.png'):
+    # MODIFIED: Exclude non-score metrics for a clean radar plot
     plot_metrics = {k: v for k, v in metrics.items() if k not in ['mAP@0.5:0.95', 'Test Time (ms/img)']}
     
     categories = list(plot_metrics.keys())
@@ -337,6 +381,7 @@ def create_metrics_summary(metrics, model_path, data_root, img_size, save_path='
     
     metrics_text = ""
     for name, value in metrics.items():
+        # MODIFIED: Custom formatting for time
         if 'Time' in name:
             metrics_text += f"{name:20s} {value:.2f} ms\n"
         else:
@@ -354,12 +399,17 @@ def save_evaluation_results(metrics, model_path, data_root, img_size, batch_size
         f.write(f"Batch Size: {batch_size}\n"); f.write(f"Confidence Threshold: {conf_thres}\n\n")
         f.write("Metrics:\n")
         for name, value in metrics.items():
+            # MODIFIED: Custom formatting for time
             if 'Time' in name:
                 f.write(f"  {name:20s} {value:.2f} ms\n")
             else:
                 f.write(f"  {name:20s} {value:.4f} ({value*100:.2f}%)\n")
         f.write("="*70 + "\n")
     print(f"✓ Evaluation results saved to {save_path}")
+
+# ============================================================
+# 🚀 MAIN FUNCTION
+# ============================================================
 
 def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -386,12 +436,14 @@ def main(args):
     )
     
     print("\n📊 Calculating metrics...")
+    # MODIFIED: Pass avg_time to the metrics calculation function
     metrics, matched_preds, matched_targets, map_metrics = calculate_metrics(
         pred_boxes, pred_labels, pred_scores, gt_boxes, gt_labels, num_classes, class_names, avg_time
     )
     
     print("\n" + "="*70 + "\n📈 EVALUATION RESULTS\n" + "="*70)
     for name, value in metrics.items():
+        # MODIFIED: Custom formatting for time
         if 'Time' in name:
             print(f"{name:20s} {value:.2f} ms")
         else:
