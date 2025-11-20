@@ -49,9 +49,14 @@ This project has a Zotero library that contains references to papers, articles, 
 This project is organized into several directories and files, each serving a specific purpose. Below is an overview of the project structure:
 
 ```plaintext
-CV9517_Group-Project/
+COMP9517-Five-by-Five/
 ├── assets/                      # Directory for assets (e.g., images, icons)
 ├── checkpoints/                 # Directory for model checkpoints (Local storage)
+├── dataset/                     # Dataset directory
+│   ├── data.yaml                # Dataset configuration
+│   ├── train/                   # Training data
+│   ├── valid/                   # Validation data
+│   └── test/                    # Test data
 ├── data/                        # Directory for data processing scripts
 │   ├── __init__.py              # Init file for data processing module
 │   ├── datamodule.py            # Script for lightning datamodule (Supports merged, RGB, and NRG modalities)
