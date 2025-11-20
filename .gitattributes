@@ -2,7 +2,6 @@
 *.pkl filter=lfs diff=lfs merge=lfs -text
 yolon filter=lfs diff=lfs merge=lfs -text
 PestProject filter=lfs diff=lfs merge=lfs -text
-README.md filter=lfs diff=lfs merge=lfs -text
 cnn filter=lfs diff=lfs merge=lfs -text
 fastrcnn filter=lfs diff=lfs merge=lfs -text
 machine_learning filter=lfs diff=lfs merge=lfs -text
